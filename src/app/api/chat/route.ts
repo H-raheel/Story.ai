@@ -1,6 +1,6 @@
 import { StringOutputParser, } from "@langchain/core/output_parsers";
 import {
-  ChatPromptTemplate
+    ChatPromptTemplate
 } from "@langchain/core/prompts";
 import { ChatGroq } from "@langchain/groq";
 import { StreamingTextResponse } from 'ai';
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         });
 
         const prompt = ChatPromptTemplate.fromMessages([
-            ["system", "You are a helpful assistant. Answer all questions to the best of your ability."],
+            ["system", "You are a story writing expert.Continue the users story by adding only one sentence that takes the story a bit further.The topic of the story is 'Haunted House`"],
             ["placeholder", "{messages}"],
             ["human", "{input}"],
         ]);
