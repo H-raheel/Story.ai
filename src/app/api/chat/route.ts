@@ -14,22 +14,26 @@ export async function POST(req: Request) {
 
         const model = new ChatGroq({
            apiKey:process.env.GROQ_API_KEY,
-            model: "mixtral-8x7b-32768",
-            // temperature: 0,
+            model: "llama3-8b-8192",
+            temperature: 0.2,
+            streaming:true,
             // maxTokens: undefined,
             // maxRetries: 2,
         });
 
         const prompt = ChatPromptTemplate.fromMessages([
-            ["system", "You are a story writing expert.Continue the users story by adding only one sentence that takes the story a bit further.The topic of the story is 'Haunted House`"],
+            ["system", "You are a story writing expert.Given the current story, continue the story with one sentence only.Make sure that the continuation to the story  is smooth. Do not repeat the users part.The age of the user is {age} years. So keep the vocabulary and sentences appropriate very easy.The topic of the story is {topic}"],
             ["placeholder", "{messages}"],
             ["human", "{input}"],
+
         ]);
+        const topic="wonderful day";
+        const age=7;
         const outputParser = new StringOutputParser();
         const chain = prompt.pipe(model).pipe(outputParser);
         console.log('chain created successfully');
       
-        const stream = await chain.stream({ input,messages });
+        const stream = await chain.stream({ input,messages,topic,age });
         
         console.log('Stream generated successfully:', stream);
 

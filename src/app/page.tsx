@@ -1,19 +1,21 @@
 'use client'
 
 import { Message, useChat } from 'ai/react';
+import { useEffect, useRef } from 'react';
 import styles from "./page.module.css";
 
-
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit,setInput,setMessages } = useChat({
-    initialMessages: [
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: 'Hi, I am BIMWERX Bob, ask me anything about BIMWERX FEA software.'
-      }
-    ]
-  })
+  const { messages, input, handleInputChange, handleSubmit, setInput, setMessages } = useChat();
+  const messageEndRef = useRef<HTMLDivElement>(null);
+
+  // Custom scroll to the bottom function
+  const scrollToBottom = () => {
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); // Whenever messages change, scroll to the bottom
 
   const customHandleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,8 +23,6 @@ export default function Chat() {
     if (!input) return;
 
     console.log("Submitting question...");
-
- //   setLoading(true);
 
     const newMessage: Message = {
       id: String(Date.now()),
@@ -40,7 +40,7 @@ export default function Chat() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages: [...messages, newMessage] ,input}),
+        body: JSON.stringify({ messages: [...messages, newMessage], input }),
       });
 
       if (!response.ok) {
@@ -51,11 +51,11 @@ export default function Chat() {
         throw new Error('Response body is null');
       }
 
-       const reader = response.body.getReader();
-       const decoder = new TextDecoder('utf-8');
-       let done = false;
-       let aiMessageContent = '';
-    
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let done = false;
+      let aiMessageContent = '';
+
       while (!done) {
         const { value, done: streamDone } = await reader.read();
         done = streamDone;
@@ -67,20 +67,15 @@ export default function Chat() {
         role: 'assistant',
         content: aiMessageContent,
       };
-      // const aiMessageContent=response;
+
       console.log("API response received: ", aiMessageContent);
-       setMessages([...messages, newMessage, aiMessage]);
+      setMessages([...messages, newMessage, aiMessage]);
     } catch (error: unknown) {
       if (error instanceof Error) {
-     //   toast(error.message, { theme: "dark" });
         console.error('Error fetching AI response:', error);
       }
-    } finally {
-    //  setLoading(false);
-      console.log("Finished fetching response.");
     }
   };
-
 
   return (
     <div className="chat">
@@ -94,6 +89,7 @@ export default function Chat() {
             </span>
           </div>
         ))}
+        <div ref={messageEndRef} />
       </div>
       <div className={styles.text_area}>
         <form onSubmit={customHandleSubmit}>
