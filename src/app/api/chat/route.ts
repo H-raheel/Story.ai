@@ -3,7 +3,6 @@ import {
     ChatPromptTemplate
 } from "@langchain/core/prompts";
 import { ChatGroq } from "@langchain/groq";
-import { StreamingTextResponse } from 'ai';
 
 export const runtime = 'edge';
 export async function POST(req: Request) {
@@ -37,7 +36,7 @@ export async function POST(req: Request) {
         
         console.log('Stream generated successfully:', stream);
 
-        return new StreamingTextResponse(stream);
+        return new Response(await stream);
   
     } catch (error) {
         console.error('Error in POST function:', error);
